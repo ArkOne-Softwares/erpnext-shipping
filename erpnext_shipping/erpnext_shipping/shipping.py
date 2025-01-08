@@ -5,6 +5,7 @@ import json
 import frappe
 from erpnext.stock.doctype.shipment.shipment import get_company_contact
 
+from erpnext_shipping.erpnext_shipping.doctype.fedex.fedex import FedexUtils
 from erpnext_shipping.erpnext_shipping.doctype.letmeship.letmeship import (
 	LETMESHIP_PROVIDER,
 	get_letmeship_utils,
@@ -34,6 +35,7 @@ def fetch_shipping_rates(
 	shipment_prices = []
 	letmeship_enabled = frappe.db.get_single_value("LetMeShip", "enabled")
 	sendcloud_enabled = frappe.db.get_single_value("SendCloud", "enabled")
+	fedex_enabled = frappe.db.get_value("Fedex", "Test", "enabled")
 	pickup_address = get_address(pickup_address_name)
 	delivery_address = get_address(delivery_address_name)
 	parcels = json.loads(parcels)
@@ -78,6 +80,12 @@ def fetch_shipping_rates(
 		)
 		sendcloud_prices = match_parcel_service_type_carrier(sendcloud_prices, "carrier", "service_name")
 		shipment_prices += sendcloud_prices
+
+	if fedex_enabled:
+		fedex = FedexUtils()
+		fedex_prices = fedex.get_available_services(delivery_address=delivery_address, parcels=parcels) or []
+		fedex_prices = match_parcel_service_type_carrier(fedex_prices, "carrier", "service_name")
+		shipment_prices += fedex_prices
 
 	shipment_prices = sorted(shipment_prices, key=lambda k: k["total_price"])
 	return shipment_prices

@@ -69,7 +69,7 @@ def get_order_creation_payload(
 		"giftwrap_charges": "",
 		"transaction_charges": "",
 		"total_discount": "",
-		"sub_total": int(value_of_goods) * sum(parcel["count"] for parcel in shipment_parcel),
+		"sub_total": float(value_of_goods) * sum(parcel["count"] for parcel in shipment_parcel),
 		"length": parcels[0]["length"],
 		"breadth": parcels[0]["breadth"],
 		"height": parcels[0]["height"],
